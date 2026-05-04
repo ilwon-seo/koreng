@@ -1,19 +1,41 @@
-﻿#Requires AutoHotkey v2.0
+#Requires AutoHotkey v2.0
 #SingleInstance Force
 
 ; ==========================================================
 ; 1. 기본 설정
 ; ==========================================================
-if not A_IsAdmin {
-    try {
-        Run '*RunAs "' A_ScriptFullPath '"'
-    }
-    ExitApp
-}
+;if not A_IsAdmin {
+;    try {
+;        Run '*RunAs "' A_ScriptFullPath '"'
+;    }
+;    ExitApp
+;}
 
 DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 CoordMode "Caret", "Screen"
 CoordMode "Mouse", "Screen"
+
+; ==========================================================
+; GUI 위치 설정
+; ==========================================================
+; 아래 4가지 중 하나를 골라 GUI_OFFSET_X 값에 넣으면 됨.
+; 현재의 우측:      GUI_OFFSET_X := 45
+; 더 먼 우측:       GUI_OFFSET_X := 80
+; 좌측:             GUI_OFFSET_X := -35
+; 더 먼 좌측:       GUI_OFFSET_X := -70
+;
+; 세로 위치는 필요하면 GUI_OFFSET_Y 값만 조정하면 됨.
+GUI_OFFSET_X := -200
+GUI_OFFSET_Y := 25
+
+; ==========================================================
+; GUI 크기 / 글자 설정
+; ==========================================================
+; 표시 문자가 잘리면 GUI_BOX_W, GUI_BOX_H 값을 키우면 됨.
+; 글자가 작으면 GUI_FONT_SIZE 값을 키우면 됨.
+GUI_FONT_SIZE := 11
+GUI_BOX_W := 36
+GUI_BOX_H := 26
 
 ; ==========================================================
 ; 2. 쌍둥이 GUI 생성 (2개 만듦)
@@ -21,15 +43,15 @@ CoordMode "Mouse", "Screen"
 ; [1호기] 마우스 따라다니는 녀석
 GuiMouse := Gui("+AlwaysOnTop -Caption +ToolWindow +Owner +LastFound +E0x20")
 GuiMouse.BackColor := "E0E0E0"
-GuiMouse.SetFont("s9 w600", "맑은 고딕")
-TxtMouse := GuiMouse.Add("Text", "w24 h18 Center cBlack", "A")
+GuiMouse.SetFont("s" GUI_FONT_SIZE " w600", "맑은 고딕")
+TxtMouse := GuiMouse.Add("Text", "w" GUI_BOX_W " h" GUI_BOX_H " Center cBlack", "A")
 WinSetTransparent(220, GuiMouse.Hwnd)
 
 ; [2호기] 텍스트 커서(캐럿) 따라다니는 녀석
 GuiCaret := Gui("+AlwaysOnTop -Caption +ToolWindow +Owner +LastFound +E0x20")
 GuiCaret.BackColor := "E0E0E0"
-GuiCaret.SetFont("s9 w600", "맑은 고딕")
-TxtCaret := GuiCaret.Add("Text", "w24 h18 Center cBlack", "A")
+GuiCaret.SetFont("s" GUI_FONT_SIZE " w600", "맑은 고딕")
+TxtCaret := GuiCaret.Add("Text", "w" GUI_BOX_W " h" GUI_BOX_H " Center cBlack", "A")
 WinSetTransparent(220, GuiCaret.Hwnd)
 
 ; 타이머 실행 (0.05초)
@@ -41,6 +63,9 @@ return
 ; ==========================================================
 CheckIME()
 {
+    global GUI_OFFSET_X, GUI_OFFSET_Y
+    global GuiMouse, TxtMouse, GuiCaret, TxtCaret
+
     ; (1) IME 상태 확인
     isHangul := IsHangulMode()
 
@@ -50,13 +75,12 @@ CheckIME()
 
     ; (3) [1호기 위치] 마우스 옆으로 이동
     MouseGetPos(&mX, &mY)
-    ; [cite_start]사용자 선호 위치: X+45, Y+5 [cite: 10]
-    GuiMouse.Show("NoActivate x" (mX + 45) " y" (mY + 5))
+    GuiMouse.Show("NoActivate x" (mX + GUI_OFFSET_X) " y" (mY + GUI_OFFSET_Y))
 
     ; (4) [2호기 위치] 텍스트 커서 옆으로 이동
     if CaretGetPos(&cX, &cY) {
         ; 커서를 찾았을 때만 표시
-        GuiCaret.Show("NoActivate x" (cX + 45) " y" (cY + 5))
+        GuiCaret.Show("NoActivate x" (cX + GUI_OFFSET_X) " y" (cY + GUI_OFFSET_Y))
     } else {
         ; 커서 없으면(마우스만 쓰고 있으면) 숨김
         GuiCaret.Hide()
@@ -68,13 +92,13 @@ UpdateGuiStyle(GuiObj, TextObj, isHangul)
 {
     if (isHangul) {
         if (GuiObj.BackColor != "4488FF") {
-            GuiObj.BackColor := "4488FF" ; [cite_start]파란색 [cite: 8]
+            GuiObj.BackColor := "4488FF"
             TextObj.Value := "한"
             TextObj.SetFont("cWhite")
         }
     } else {
         if (GuiObj.BackColor != "FFB27D") {
-            GuiObj.BackColor := "FFB27D" ; [cite_start]주황색 [cite: 9]
+            GuiObj.BackColor := "FFB27D"
             TextObj.Value := "A"
             TextObj.SetFont("cBlack")
         }
