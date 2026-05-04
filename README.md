@@ -23,7 +23,7 @@ Windows 환경에서 현재 입력 모드(한글/영어)를 마우스 커서와 
 
 이 프로그램은 다음 환경에 최적화되어 있습니다.
 
-* **OS:** Windows 10 / 11 (64-bit)
+* **OS:** Windows 11 (64-bit) **25H2** (25H2 이상에서만 정상 동작함)
 * **IME:** Microsoft 입력기 **최신 버전** (New Microsoft IME)
     * *주의: '이전 버전의 Microsoft IME(Legacy)' 호환 모드에서는 동작하지 않을 수 있습니다.*
 * **Platform:** AutoHotkey v2.0 이상
